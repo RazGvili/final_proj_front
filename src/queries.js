@@ -37,10 +37,13 @@ export function getImagesByKeyWordShutter(keyWord) {
 
 export function getKeyWords(text) {
 
-    return axios.post('http://localhost:9000' ,
-    {   
-        data : text,
-        
+    return axios.get('https://us-central1-wise-invention-246014.cloudfunctions.net/function-1' , {   
+        data: text ,
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Access-Control-Allow-Origin': '*'
+        },
+        responseType: 'text'
     }).then((results) =>{
         console.log(results)
         return results

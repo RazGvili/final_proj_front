@@ -129,7 +129,7 @@ class UploadText extends React.Component {
                         <RenderImages images={this.state.images} />
                     }
 
-                    { (this.state.images.length == 0) && (this.state.pressed) &&
+                    { (this.state.images.length === 0) && (this.state.pressed) &&
                         <Message warning>
                             <Message.Header>No images found, Try again</Message.Header>
                         </Message>                    

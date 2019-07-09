@@ -32,13 +32,13 @@ class RenderImages extends React.Component {
         <div>
             <Grid columns={3}>   
                 <Grid.Column>
-                        {imagesList.slice(0,2)} 
+                        {imagesList.slice(0,3)} 
                 </Grid.Column>
                 <Grid.Column>
-                        {imagesList.slice(2,4)} 
+                        {imagesList.slice(3,6)} 
                 </Grid.Column>
                 <Grid.Column>
-                        {imagesList.slice(4,6)} 
+                        {imagesList.slice(6,9)} 
                 </Grid.Column>
             </Grid>    
         </div>
