@@ -1,6 +1,6 @@
 import React from 'react'
 import RenderImages from "./renderImages"
-import { Form, TextArea, Icon, Header, Button, Input, Radio, Message, Divider } from 'semantic-ui-react'
+import { Form, TextArea, Icon, Header, Button, Input, Radio, Message, Divider, List } from 'semantic-ui-react'
 import { getImagesByKeyWord, getKeyWords, getImagesByKeyWordShutter } from "../queries"
 
 
@@ -9,9 +9,14 @@ class UploadText extends React.Component {
         term: '',
         images: [], 
         text: '',
-        Keywords: '',
+        Keywords: [],
+        KeywordsJoined: [],
         api: "Using UnSplash",
-        pressed: false
+        pressed: false,
+        searchDone: false,
+        noKeywords: false,
+        serverErr: false,
+        showKeywords: false
     }
 
     onFormSubmitKeyWords(e){
@@ -32,7 +37,6 @@ class UploadText extends React.Component {
     }
 
     switchApi() {
-
         console.log(this.state.api)
         if (this.state.api === "Using UnSplash") {
             this.setState({api: "Using Shutterstock"})
@@ -45,13 +49,52 @@ class UploadText extends React.Component {
         e.preventDefault()
         getKeyWords()
 
-        console.log(this.state.text)
         getKeyWords(this.state.text).then((keyWordsFromServer) => {
-            this.setState({Keywords: keyWordsFromServer})
+
+            if(keyWordsFromServer) {
+                this.setState({searchDone: true})
+
+                let Keywords = keyWordsFromServer[0]
+                let KeywordsJoined = keyWordsFromServer[1]
+
+                if (keyWordsFromServer.length > 0) {
+                    this.setState({Keywords: Keywords, KeywordsJoined: KeywordsJoined, noKeywords: false, serverErr: false, showKeywords: true})
+                } else {
+                    this.setState({noKeywords: true, showKeywords: false})
+                }
+            } 
+        }).catch((err) => {
+            this.setState({serverErr: true, showKeywords: false})
         })
     }
 
     render() {
+
+        let keywordList = this.state.Keywords.map((keyword) => { 
+
+            return (
+                <div style={{textAlign: 'center'}}>
+                    <div key={keyword[0]}>
+                        <List>
+                            <List.Item>{keyword[0]}</List.Item>
+                        </List>
+                    </div>
+                </div>
+            )
+        })
+
+        let keywordListJoined = this.state.KeywordsJoined.map((keyword) => { 
+
+            return (
+                <div style={{textAlign: 'center'}}>
+                    <div key={keyword[0]}>
+                        <List>
+                            <List.Item>{keyword[0]}</List.Item>
+                        </List>
+                    </div>
+                </div>
+            )
+        })
 
         return (
             
@@ -77,6 +120,34 @@ class UploadText extends React.Component {
                         <Button type='submit'>Compute key words </Button> 
                     </div>
                 </Form>
+
+                <br/>
+
+                { this.state.noKeywords && 
+                    <div style={{textAlign: 'center'}}>
+                        <Message warning>
+                            <Message.Header>No keywords found!</Message.Header>
+                        </Message>
+                    </div>
+                }
+
+                { this.state.serverErr && 
+                    <div style={{textAlign: 'center'}}>
+                        <Message negative>
+                            <Message.Header>Server error!</Message.Header>
+                        </Message>
+                    </div>
+                }
+
+                { this.state.showKeywords && keywordList
+
+                }
+
+                <br/>
+
+                { this.state.showKeywords && keywordListJoined
+
+                }
 
                 <br/>
                 <br/>
@@ -107,9 +178,7 @@ class UploadText extends React.Component {
 
                     <br/>
                     <br/>
-
-
-                    
+    
                     <Form onSubmit={(e) => this.onFormSubmitKeyWords(e)}>
                         <Input 
                             type="text"

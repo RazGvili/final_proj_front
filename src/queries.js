@@ -37,16 +37,14 @@ export function getImagesByKeyWordShutter(keyWord) {
 
 export function getKeyWords(text) {
 
-    return axios.get('https://us-central1-wise-invention-246014.cloudfunctions.net/function-1' , {   
-        data: text ,
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'Access-Control-Allow-Origin': '*'
-        },
-        responseType: 'text'
+    //console.log(text)
+    return axios.post('http://127.0.0.1:5000/' , {   
+        data: {"nlp_area_field": text} ,
+        //responseType: 'text'
     }).then((results) =>{
         console.log(results)
-        return results
+        console.log(results.data[0])
+        return results.data
     })
     
 }
