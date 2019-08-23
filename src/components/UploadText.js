@@ -65,7 +65,10 @@ class UploadText extends React.Component {
 
         getKeyWords(this.state.text, this.state.url).then((keyWordsFromServer) => {
 
-            if(keyWordsFromServer) {
+            console.log(keyWordsFromServer)
+            console.log("Array.isArray(keyWordsFromServer):" + Array.isArray(keyWordsFromServer))
+
+            if(keyWordsFromServer && Array.isArray(keyWordsFromServer)) {
                 this.setState({searchDone: true})
 
                 let Keywords = keyWordsFromServer[0]
@@ -76,6 +79,7 @@ class UploadText extends React.Component {
                 } else {
                     this.setState({noKeywords: true, showKeywords: false, loading: false})
                 }
+                
             } else {
                 this.setState({serverErr: true, showKeywords: false, loading: false})
             }
