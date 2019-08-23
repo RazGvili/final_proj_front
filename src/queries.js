@@ -35,16 +35,19 @@ export function getImagesByKeyWordShutter(keyWord) {
     }).catch(err => {console.log(err)})
 }
 
-export function getKeyWords(text) {
+export function getKeyWords(text, urlForServer = 'https://5ad83887.ngrok.io') {
 
     //console.log(text)
-    return axios.post('http://127.0.0.1:5000/' , {   
+    return axios.post(urlForServer, {   
         data: {"nlp_area_field": text} ,
         //responseType: 'text'
     }).then((results) =>{
         console.log(results)
         console.log(results.data[0])
         return results.data
+    }).catch(err => {
+        console.log(err)
+        return false
     })
     
 }

@@ -1,8 +1,9 @@
 import React from 'react'
 import RenderImages from "./renderImages"
-import { Form, TextArea, Icon, Header, Button, Input, Radio, Message, Divider, List } from 'semantic-ui-react'
+import { Form, TextArea, Icon, Header, Button, Input, Radio, Message, Divider, List, Modal} from 'semantic-ui-react'
 import { getImagesByKeyWord, getKeyWords, getImagesByKeyWordShutter } from "../queries"
 
+import MessageExampleIcon from './loadingMessage'
 
 class UploadText extends React.Component {
     state = {
@@ -16,8 +17,15 @@ class UploadText extends React.Component {
         searchDone: false,
         noKeywords: false,
         serverErr: false,
-        showKeywords: false
+        showKeywords: false,
+        loading: false,
+        url: "",
+        urlTemp: "",
+        urlPressed: false,
+        openModal: false
     }
+
+    handleClose = () => this.setState({ openModal: false })
 
     onFormSubmitKeyWords(e){
         e.preventDefault()
@@ -49,7 +57,13 @@ class UploadText extends React.Component {
         e.preventDefault()
         getKeyWords()
 
-        getKeyWords(this.state.text).then((keyWordsFromServer) => {
+        this.setState({loading: true})
+
+        if (this.state.url.length < 1) {
+            this.setState({openModal: true})
+        }
+
+        getKeyWords(this.state.text, this.state.url).then((keyWordsFromServer) => {
 
             if(keyWordsFromServer) {
                 this.setState({searchDone: true})
@@ -58,14 +72,23 @@ class UploadText extends React.Component {
                 let KeywordsJoined = keyWordsFromServer[1]
 
                 if (keyWordsFromServer.length > 0) {
-                    this.setState({Keywords: Keywords, KeywordsJoined: KeywordsJoined, noKeywords: false, serverErr: false, showKeywords: true})
+                    this.setState({Keywords: Keywords, KeywordsJoined: KeywordsJoined, noKeywords: false, serverErr: false, showKeywords: true, loading: false})
                 } else {
-                    this.setState({noKeywords: true, showKeywords: false})
+                    this.setState({noKeywords: true, showKeywords: false, loading: false})
                 }
-            } 
+            } else {
+                this.setState({serverErr: true, showKeywords: false, loading: false})
+            }
         }).catch((err) => {
-            this.setState({serverErr: true, showKeywords: false})
+            console.log(err)
+            this.setState({serverErr: true, showKeywords: false, loading: false})
         })
+    }
+
+    urlPressed(e) {
+        e.preventDefault()
+        this.setState({url: this.state.urlTemp})
+        this.setState({urlPressed: true})
     }
 
     render() {
@@ -104,6 +127,42 @@ class UploadText extends React.Component {
                     NLP Project 
                     <Icon name='bolt' size='massive' color='yellow'/>
                 </Header>
+
+                <br />
+                <br />
+
+                <div style={{textAlign: 'center'}}>
+                    <Form onSubmit={(e) => this.urlPressed(e)}>
+                            <Input  
+                                type="text"
+                                placeholder='https://5ad83887.ngrok.io'
+                                value={this.state.urlTemp}
+                                onChange={ e => {this.setState({ urlTemp: e.target.value })}}
+                                />
+                            <Button type='submit'> Update server url </Button>
+                    </Form>    
+                </div>
+
+                <br />
+                <br />
+
+                {this.state.urlPressed && 
+                    <div style={{textAlign: 'center'}}>
+                        <Message info compact>
+                            <Message.Header>{"Server URL ------>  " + (this.state.url.length > 1 ? this.state.url : "CHOOSE URL!")}</Message.Header>
+                        </Message>
+                    </div>
+                }
+
+                <br />
+                <br />
+
+                <Divider horizontal>
+                    <Header as='h4'>
+                        <Icon name='searchengin' />
+                            Keywords from text 
+                    </Header>
+                </Divider>
                 
 
                 <Form onSubmit={(e) => this.onFormSubmitText(e)}>
@@ -139,6 +198,21 @@ class UploadText extends React.Component {
                     </div>
                 }
 
+                { this.state.loading && 
+                    <div style={{textAlign: 'center'}}>
+                        <MessageExampleIcon />
+                    </div>
+                }
+
+                { this.state.showKeywords && 
+                    <div style={{textAlign: 'center'}}>
+                            <Message success compact>
+                                <Message.Header> Keywords found!</Message.Header>
+                            </Message>
+                        <br/>
+                    </div>
+                }
+
                 { this.state.showKeywords && keywordList
 
                 }
@@ -155,7 +229,7 @@ class UploadText extends React.Component {
                 <Divider horizontal>
                     <Header as='h4'>
                         <Icon name='images' />
-                        Image Search - Use computed key terms from text / Your key terms 
+                            Image Search from ShutterStock & UnSplash APIs
                     </Header>
                 </Divider>
 
@@ -205,6 +279,20 @@ class UploadText extends React.Component {
                     }
 
                 </div>
+
+                <Modal open={this.state.openModal} basic size='small' onClose={this.handleClose}>
+                    <Header icon='cancel' content='Server URL not updated, you wish to continue?' />
+                    <Modal.Content>
+                    <p>
+                        This app is working with ngrok free version, hence you have to update the ngrok tunnel every 8 hrs of use
+                    </p>
+                    </Modal.Content>
+                    <Modal.Actions>
+                    <Button basic color='red' inverted onClick={this.handleClose}>
+                        <Icon name='remove' /> OK
+                    </Button>
+                    </Modal.Actions>
+                </Modal>
                 
             </div>
         )
